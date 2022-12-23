@@ -58,6 +58,9 @@ async function joinRoom(data, res) {
       roomId: roomId
     });
 
+    const findGameMode = await game.findOne({
+      roomId
+    });
     // await game.updateOne({
     //   roomId: roomId,
     //   players: [
@@ -96,7 +99,8 @@ async function joinRoom(data, res) {
     const socketResponse = {
       status: true,
       message: "Joined!",
-      data: findRoom
+      data: findRoom,
+      mode: findGameMode.mode
     };
 
     // join room

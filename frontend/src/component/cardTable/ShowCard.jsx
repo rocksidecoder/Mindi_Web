@@ -265,10 +265,16 @@ const ShowCard = () => {
 
   // handle turn click
   const handleTurnClick = (card) => {
+    const isCut =
+      state.mode === "Cut" && !hukam && currentDrawCard && !isDrawAvailable;
+
+    console.log("isCut", isCut);
+    console.log("turn", turn);
+    console.log("isCut", card);
     setTimeout(() => {
       socket.emit(
         "handle:turn",
-        { roomId: id, turn, card, teamOne, teamTwo },
+        { roomId: id, turn, card, teamOne, teamTwo, isCut },
         (res) => {
           const response = sortingUser(res.data.players);
           setIsStart(res.start);
@@ -433,14 +439,14 @@ const ShowCard = () => {
             {teamsData?.team2?.mindi.map((i) => (
               <img
                 src={selectedHukam[i]}
-                style={{ height: "8px", width: "8px" }}
+                style={{ height: "8px", width: "8px", marginTop: "10px" }}
               />
             ))}
           </ul>
         </div>
       </Paper>
 
-      {state.mode === "Hide" && (
+      {state.mode === "Hide" ? (
         <div
           style={{
             width: "75px",
@@ -456,6 +462,35 @@ const ShowCard = () => {
               style={{ height: "100%", width: "100%" }}
             />
           ) : (
+            <div
+              style={{ position: "relative", height: "100%", width: "100%" }}
+            >
+              <img src={blankImg} style={{ height: "100%", width: "100%" }} />
+              <img
+                src={selectedHukam[hukam]}
+                style={{
+                  height: "40px",
+                  width: "40px",
+                  position: "absolute",
+                  right: "50%",
+                  transform: "translate(50% , 50%)",
+                  bottom: "50%"
+                }}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          style={{
+            width: "75px",
+            height: "110px",
+            position: "absolute",
+            top: "50px",
+            left: "265px"
+          }}
+        >
+          {hukam && (
             <div
               style={{ position: "relative", height: "100%", width: "100%" }}
             >
@@ -533,6 +568,7 @@ const ShowCard = () => {
                       handleTurnClick={handleTurnClick}
                       currentDrawCard={currentDrawCard}
                       checkIsDrawAvailable={checkIsDrawAvailable}
+                      mode={state.mode}
                     />
                   )
                 )}
@@ -587,6 +623,7 @@ const ShowCard = () => {
           Start
         </Button>
       )}
+
       {table.length != userGamePosition.length &&
       !isDrawAvailable &&
       turn === loginDetail.username &&
