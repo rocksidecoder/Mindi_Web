@@ -109,7 +109,7 @@ async function initialGameDetail(io, socket, data, res) {
 
 async function handleTurn(io, data, res) {
   try {
-    const { roomId, turn, card, teamOne, teamTwo } = data;
+    const { roomId, turn, card, teamOne, teamTwo, isCut } = data;
     let winnerTeam = null;
 
     const updateUserCard = await game.findOneAndUpdate(
@@ -140,8 +140,28 @@ async function handleTurn(io, data, res) {
       }
     );
 
-    // find the winner
+    // set the hukam if game mode is cut
+    if (isCut) {
+      const hukamName = card.split("/src/assets/cards/")[1].split(".")[0][0];
+
+      gameData.hideCard = card;
+      gameData.hideCardUser = turn;
+      gameData.hukam = hukamName;
+      await gameData.save();
+      // const updateHideCard = await game.updateOne(
+      //   {
+      //     roomId
+      //   },
+      //   {
+      //     hideCard: card,
+      //     hideCardUser: turn,
+      //     hukam: hukamName
+      //   }
+      // );
+    }
+
     if (gameData.players.every((i) => i.cards.length === 0)) {
+      // find the winner
       console.log("inside if condition .....");
       if (
         gameData.teams.team1.mindi.length > gameData.teams.team2.mindi.length
@@ -263,7 +283,6 @@ async function handleTurn(io, data, res) {
       });
     }
   } catch (error) {
-    console.log("error ====>", error);
     res({
       start: false,
       success: false,
@@ -390,7 +409,7 @@ async function distributeCard(data) {
       { roomId },
       {
         $set: {
-          hideCardUser: playerTurn,
+          hideCardUser: findRoom.mode === "Hide" ? playerTurn : "",
           players: playersData,
           playerTurn:
             typeof playerTurn === "number"

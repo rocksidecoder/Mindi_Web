@@ -93,11 +93,12 @@ export default function Home() {
       (res) => {
         if (!res.status) toastMessage(res.error, toastTypes.error);
         else {
+          setMode(res.mode);
           toastMessage(res.message, toastTypes.success);
           navigate(`/room/${codeValue}`, {
             state: {
               totalPlayers: res.data.players,
-              mode
+              mode: res.mode
             }
           });
         }

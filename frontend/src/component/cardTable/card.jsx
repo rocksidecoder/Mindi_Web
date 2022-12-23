@@ -14,7 +14,8 @@ const Card = ({
   hukam,
   handleTurnClick,
   currentDrawCard,
-  checkIsDrawAvailable
+  checkIsDrawAvailable,
+  mode
 }) => {
   const [hover, setHover] = useState(null);
   const [selectedCard, setSelectedCard] = useState({
@@ -33,7 +34,8 @@ const Card = ({
       if (!currentDrawCard) {
         return true;
       } else {
-        if (!isDrawAvailable) return !!hukam;
+        if (!isDrawAvailable) return mode === "Cut" ? true : !!hukam;
+
         return (
           val.split("/src/assets/cards/")[1].split(".")[0][0] ===
           currentDrawCard[0]

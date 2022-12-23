@@ -13,7 +13,10 @@ const gameSchema = new mongoose.Schema(
       type: String,
       default: null
     },
-    hideCardUser: String,
+    hideCardUser: {
+      type: String,
+      default: null
+    },
     hideCard: {
       type: String,
       default: null
