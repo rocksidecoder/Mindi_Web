@@ -7,6 +7,7 @@ import {
   assignTurn,
   distributedCard,
   playerPositions,
+  selectRandomDrawCard,
   tableCardPositions,
   toastTypes
 } from "../../utils/helper";
@@ -17,6 +18,7 @@ import authAxios from "../../http/authAxios";
 import toastMessage from "../../utils/toast";
 import backgroundImg from "../../assets/cards/background.svg";
 import blankImg from "../../assets/card-symbols/Blank.svg";
+import useTimer from "../../hooks/timer";
 
 const ShowCard = () => {
   const navigate = useNavigate();
@@ -42,6 +44,15 @@ const ShowCard = () => {
     team1: null,
     team2: null
   });
+  const { time, isTimeEnd, startTimer, resetTimer } = useTimer();
+
+  const isShowBtnEnable =
+    table.length != userGamePosition.length &&
+    !isDrawAvailable &&
+    turn === loginDetail.username &&
+    currentDrawCard &&
+    !hukam &&
+    state.mode === "Hide";
 
   //set the player postion style according to total players
   const dropPosition =
@@ -77,7 +88,7 @@ const ShowCard = () => {
     });
 
     // for sorting the user
-    socket.on("sorting:backUser", ({ data, start }) => {
+    socket.on("sorting:backUser", ({ data, start, timer }) => {
       // toastMessage(`${data.playerTurn} turn!`, toastTypes.success);
       const res = sortingUser(data.players);
       setIsStart(start);
@@ -86,6 +97,9 @@ const ShowCard = () => {
       setTeamTwo(team[1]);
       setTurn(data.playerTurn);
       setUserGamePosition(res);
+
+      // start timer
+      if (timer) startTimer(20);
     });
 
     //send the game detail
@@ -152,6 +166,8 @@ const ShowCard = () => {
         setTable([]);
         setCurrentDrawCard("");
       }
+      // reset timer
+      resetTimer();
     });
 
     socket.on("response:showHukam", (data) => {
@@ -185,6 +201,28 @@ const ShowCard = () => {
     }
   };
 
+  //select random draw card if isTimeEnd
+  useEffect(() => {
+    if (isTimeEnd && loginDetail.username === turn) {
+      const currUserCards = userGamePosition.find(
+        (i) => i.username === loginDetail.username
+      );
+
+      const resCard = selectRandomDrawCard(
+        currUserCards.cards,
+        currentDrawCard,
+        hukam,
+        isDrawAvailable
+      );
+
+      // show hukam when isTimeEnd
+      if (isShowBtnEnable) {
+        handleShowHukam();
+        handleTurnClick(resCard);
+      } else handleTurnClick(resCard);
+    }
+  }, [isTimeEnd, turn]);
+
   // start the game
   const handleStart = async () => {
     const res = distributedCard(allCard, state.totalPlayers);
@@ -194,16 +232,21 @@ const ShowCard = () => {
       "assign:randomTurn",
       {
         roomId: id,
-        cardData: assignTurn(newCardsArray, state.totalPlayers)
+        cardData: assignTurn(newCardsArray, state.totalPlayers),
+        timer: false
       },
       (res) => {}
     );
 
     // distribute cards
     setTimeout(() => {
-      socket.emit("sorting:sendUser", { roomId: id, cardData: res }, (res) => {
-        console.log(res);
-      });
+      socket.emit(
+        "sorting:sendUser",
+        { roomId: id, cardData: res, timer: true },
+        (res) => {
+          console.log(res);
+        }
+      );
     }, 5000);
   };
 
@@ -264,13 +307,10 @@ const ShowCard = () => {
   };
 
   // handle turn click
-  const handleTurnClick = (card) => {
+  function handleTurnClick(card) {
     const isCut =
       state.mode === "Cut" && !hukam && currentDrawCard && !isDrawAvailable;
 
-    console.log("isCut", isCut);
-    console.log("turn", turn);
-    console.log("isCut", card);
     setTimeout(() => {
       socket.emit(
         "handle:turn",
@@ -299,7 +339,7 @@ const ShowCard = () => {
         }
       );
     }, 1500);
-  };
+  }
 
   //set position of table card to all users
   const getCardTablePosition = (data, players) => {
@@ -326,7 +366,7 @@ const ShowCard = () => {
     return ans;
   };
 
-  const handleShowHukam = () => {
+  function handleShowHukam() {
     socket.emit("show:hukam", { roomId: id }, (data) => {
       const res = sortingUser(data.data.players);
       const team = makingTeam(res);
@@ -337,7 +377,7 @@ const ShowCard = () => {
       setUserGamePosition(res);
       setHukam(data.data.hukam);
     });
-  };
+  }
 
   //check draw card is available or not
   const checkIsDrawAvailable = (isDrawAvailable) => {
@@ -522,6 +562,32 @@ const ShowCard = () => {
           }}
         >
           Your Turn
+        </div>
+      )}
+
+      {/* display timer */}
+      {isStart && (
+        <div
+          style={{
+            display: " flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: " absolute",
+            top: " 10px",
+            right: " 110px",
+            height: " 60px",
+            width: " 60px",
+            border:
+              time <= 5
+                ? "4px solid rgb(231 70 70)"
+                : "4px solid rgb(205, 231, 185)",
+            borderRadius: "40px",
+            color: "#241c22",
+            fontWeight: "600",
+            fontSize: "20px"
+          }}
+        >
+          {time}
         </div>
       )}
 

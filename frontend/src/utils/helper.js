@@ -237,3 +237,36 @@ export const tableCardPositions = [
     transform: "rotate(90deg)"
   }
 ];
+
+export const selectRandomDrawCard = (
+  cards,
+  currDrawCard,
+  hukam,
+  isDrawAvailable
+) => {
+  let randomCard = null;
+  let arr = [];
+
+  if (!currDrawCard) {
+    randomCard = cards[Math.floor(Math.random() * cards.length)];
+  } else if (isDrawAvailable) {
+    arr = cards.filter((ele) => {
+      return (
+        ele.split("/src/assets/cards/")[1].split(".")[0][0] === currDrawCard[0]
+      );
+    });
+    randomCard = arr[Math.floor(Math.random() * arr.length)];
+  } else if (currDrawCard && !isDrawAvailable) {
+    arr = cards.filter((ele) => {
+      return ele.split("/src/assets/cards/")[1].split(".")[0][0] === hukam;
+    });
+
+    if (!arr.length) {
+      randomCard = cards[Math.floor(Math.random() * cards.length)];
+    } else {
+      randomCard = arr[Math.floor(Math.random() * arr.length)];
+    }
+  }
+
+  return randomCard;
+};
