@@ -57,15 +57,16 @@ async function sendUser(io, data, res) {
   try {
     let cardRes = await distributeCard(data);
 
-    const { roomId } = data;
+    const { roomId, timer } = data;
+
     const backUsers = await game.findOne({
       roomId
     });
-    // console.log("🚀 ~ backUsers", backUsers);
 
     io.in(roomId).emit("sorting:backUser", {
       data: backUsers,
-      start: true
+      start: true,
+      timer
     });
 
     res({
@@ -162,7 +163,6 @@ async function handleTurn(io, data, res) {
 
     if (gameData.players.every((i) => i.cards.length === 0)) {
       // find the winner
-      console.log("inside if condition .....");
       if (
         gameData.teams.team1.mindi.length > gameData.teams.team2.mindi.length
       ) {
