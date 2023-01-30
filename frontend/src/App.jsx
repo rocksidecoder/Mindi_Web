@@ -11,6 +11,7 @@ import SocketProvider from "./context/socketContext";
 import Room from "./component/room/room";
 import DefaultLayout from "./component/layout/defaultLayout";
 import RoomRouter from "./component/auth/roomRouter";
+import History from "./component/history/history";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/history" element={<History />} />
             <Route
               path="/home"
               element={

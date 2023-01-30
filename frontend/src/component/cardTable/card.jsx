@@ -81,7 +81,7 @@ const Card = ({
             // y: 750
           }}
           transition={{
-            type: "spring",
+            type: "tween",
             bounce: 0.15
           }}
           onClick={() => {
