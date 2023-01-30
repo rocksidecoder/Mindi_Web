@@ -1,4 +1,4 @@
-import { Button, Paper } from "@mui/material";
+import { Backdrop, Button, Paper } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import Card from "./card";
 import { cardsArray, newCardsArray, selectedHukam } from "../../utils/allCards";
@@ -44,6 +44,8 @@ const ShowCard = () => {
     team1: null,
     team2: null
   });
+  const [backdrop, setBackdrop] = useState(false);
+  const [winMsg, setWinMsg] = useState("");
   const { time, isTimeEnd, startTimer, resetTimer } = useTimer();
 
   const isShowBtnEnable =
@@ -148,12 +150,15 @@ const ShowCard = () => {
       setHukam(data.data.hukam);
       setTeamsData(data.data.teams);
       if (!data.data.table.length && data.winner) {
-        toastMessage(`${data.winner} is win the game!`, toastTypes.success);
+        setBackdrop(true);
+        setWinMsg(`${data.winner.toUpperCase()} WIN GAME`);
+        // toastMessage(`${data.winner} is win the game!`, toastTypes.success);
         setTimeout(() => {
+          setBackdrop(false);
           navigate("/home", {
             replace: true
           });
-        }, 1000);
+        }, 4000);
       }
       if (data.data.table?.length) {
         const drawCard = data.data.table[0].card
@@ -449,7 +454,7 @@ const ShowCard = () => {
             {teamsData?.team1?.mindi.map((i) => (
               <img
                 src={selectedHukam[i]}
-                style={{ height: "8px", width: "8px" }}
+                style={{ height: "13px", width: "13px", margin: "3px" }}
               />
             ))}
           </ul>
@@ -479,14 +484,14 @@ const ShowCard = () => {
             {teamsData?.team2?.mindi.map((i) => (
               <img
                 src={selectedHukam[i]}
-                style={{ height: "8px", width: "8px", marginTop: "10px" }}
+                style={{ height: "13px", width: "13px", margin: "3px" }}
               />
             ))}
           </ul>
         </div>
       </Paper>
 
-      {state.mode === "Hide" ? (
+      {state.mode === "Hide" && isStart ? (
         <div
           style={{
             width: "75px",
@@ -709,6 +714,15 @@ const ShowCard = () => {
             </Button>
           )
         : ""}
+
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={backdrop}
+      >
+        <p style={{ color: "#a3ff85", fontSize: "110px", fontWeight: "500" }}>
+          {} WIN GAME
+        </p>
+      </Backdrop>
     </div>
   );
 };

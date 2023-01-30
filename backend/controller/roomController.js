@@ -1,5 +1,6 @@
 const game = require("../model/game");
 const room = require("../model/room");
+const winner = require("../model/winner");
 const APIError = require("../utils/APIError");
 
 // called through socket
@@ -202,11 +203,44 @@ const checkRoom = async (req, res, next) => {
   }
 };
 
+const userHistory = async (req, res, next) => {
+  try {
+    const { player } = req.params;
+    let findPlayerTeam;
+
+    let historyData = await winner
+      .find({
+        $or: [
+          { "teams.team1.players": player },
+          { "teams.team2.players": player }
+        ]
+      })
+      .lean();
+
+    historyData = historyData.map((ele) => {
+      ele.teams.team1.mindi = ele.teams.team1.mindi.join(" ");
+      ele.teams.team2.mindi = ele.teams.team2.mindi.join(" ");
+
+      findPlayerTeam = ele.teams.team1.players[0].includes(player)
+        ? "team1"
+        : "team2";
+
+      return { ...ele, playerTeam: findPlayerTeam };
+    });
+
+    return res.send(historyData);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 module.exports = {
   addRoom,
   joinRoom,
   checkRoom,
-  leaveRoom
+  leaveRoom,
+  userHistory
 };
 
 // useEffect(() => {
