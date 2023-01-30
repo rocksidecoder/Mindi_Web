@@ -131,7 +131,14 @@ export default function Home() {
   };
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "space-between"
+      }}
+    >
       <Paper
         className="paperRoom"
         sx={{ width: "100%", maxWidth: "300px", margin: "65px" }}
@@ -206,6 +213,24 @@ export default function Home() {
           </Button>
         </Box>
       </Paper>
+
+      <div>
+        <Button
+          variant="contained"
+          onClick={() => {
+            navigate("/history");
+          }}
+          sx={{
+            margin: "22px",
+            backgroundColor: "#5a3660",
+            "&:hover": {
+              backgroundColor: "#5a366088"
+            }
+          }}
+        >
+          Game History
+        </Button>
+      </div>
 
       <Dialog
         open={open}
