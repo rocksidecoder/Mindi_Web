@@ -125,7 +125,7 @@ async function leaveRoom(data, res) {
   try {
     const { host, roomId } = data;
 
-    const updateRoom = await room.updateOne(
+    const updateRoom = await room.findOneAndUpdate(
       {
         roomId: roomId
       },
@@ -152,6 +152,11 @@ async function leaveRoom(data, res) {
         new: true
       }
     );
+
+    if (!updateRoom.users.length) {
+      await updateRoom.delete();
+      await updateGame.delete();
+    }
 
     const socketResponse = {
       status: true,
